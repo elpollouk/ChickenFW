@@ -34,6 +34,6 @@
     };
 
     // Export the the name space function in a safe way
-    window.Utils = window.Utils || {};
-    window.Utils.namespace = namespace;
+    window.Chicken = window.Chicken || {};
+    window.Chicken.namespace = namespace;
 })();

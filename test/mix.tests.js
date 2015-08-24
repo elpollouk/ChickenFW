@@ -31,7 +31,7 @@
 				this.output = "";
 			};
 
-			Utils.mix(TargetObj.prototype, MixIn123);
+			Chicken.mix(TargetObj.prototype, MixIn123);
 
 			var obj = new TargetObj();
 			obj.one();
@@ -46,7 +46,7 @@
 				this.output = "";
 			};
 
-			Utils.mix(TargetObj.prototype, MixIn123, MixIn456);
+			Chicken.mix(TargetObj.prototype, MixIn123, MixIn456);
 
 			var obj = new TargetObj();
 			obj.one();
@@ -60,7 +60,7 @@
 		},
 
 		combine_single: function () {
-			var obj = Utils.combine(MixIn123);
+			var obj = Chicken.combine(MixIn123);
 			obj.output = "";
 
 			obj.one();
@@ -71,7 +71,7 @@
 		},
 
 		combine_multiple: function () {
-			var obj = Utils.combine(MixIn123, MixIn456);
+			var obj = Chicken.combine(MixIn123, MixIn456);
 			obj.output = "";
 
 			obj.one();

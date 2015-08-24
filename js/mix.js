@@ -9,7 +9,7 @@
         }
     };
 
-    Utils.namespace("Utils", {
+    Chicken.namespace("Chicken", {
         // Mix all subsequent objects into the object specified in the first argument
         mix: function mix() {
             var target = arguments[0];

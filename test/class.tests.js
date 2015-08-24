@@ -3,7 +3,7 @@
 
 	window.Tests.ClassTests = {
 		define: function () {
-			var MyClass = Utils.Class(function (init) {
+			var MyClass = Chicken.Class(function (init) {
 				this._init = init;
 			},
 			{
