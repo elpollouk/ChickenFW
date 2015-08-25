@@ -2,8 +2,8 @@
 	"use strict";
 
 	//              System under test                   Test script
-	Test.addScripts("../js/namespace.js",				"namespace.tests.js");
 	Test.addScripts("../js/mix.js",						"mix.tests.js");
+	Test.addScripts("../js/namespace.js",				"namespace.tests.js");
 	Test.addScripts("../js/class.js",					"class.tests.js");
 
 })();

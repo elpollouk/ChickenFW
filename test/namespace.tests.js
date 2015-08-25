@@ -68,6 +68,30 @@
 			Assert.isEqual(8, root.n1.h, "Value wasn't set correctly in name space");
 			Assert.isEqual(9, root.n1.i, "Value wasn't set correctly in name space");
 			Assert.isEqual(10, root.n1.n2.j, "Value wasn't set correctly in name space");
+		},
+
+		namespace_nodot_Object: function () {
+
+			var root = {};
+			var thing = { a: 3, b: 5, c: 7 };
+
+			Chicken.namespace("thing", thing, root);
+
+			Assert.isSame(3, root.thing.a);
+			Assert.isSame(5, root.thing.b);
+			Assert.isSame(7, root.thing.c);
+
+		},
+
+		namespace_nodot_value: function () {
+
+			var root = {};
+
+			Chicken.namespace("value", "Test", root);
+
+			Assert.isSame("Test", root.value);
+
 		}
+
 	};
 })();
