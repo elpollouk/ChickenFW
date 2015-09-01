@@ -72,7 +72,11 @@
 
 		fail: function fail(message) {
 			throw new Error(_buildMessage("Failed", message));
-		}
+		},
+
+		expectedException: function expectedException(details) {
+			_expectedException = details || {};
+		},
 	};
 
 	// Assert Aliases
@@ -83,16 +87,18 @@
 		// Add a test entry to the output
 		// Returns a function to indicate if the test has passed or failed
 		addTestEntry: function addTestEntry(testName) {
-			var div = document.createElement("div");
-			div.innerText = testName + " ";
-			var span = document.createElement("span");
-			span.innerText = "[...]";
-			div.appendChild(span);
+			var containerDiv = document.createElement("div");
+			var titleDiv = document.createElement("div");
+			titleDiv.innerText = testName + " ";
+			var passFailSpan = document.createElement("span");
+			passFailSpan.innerText = "[...]";
+			titleDiv.appendChild(passFailSpan);
+			containerDiv.appendChild(titleDiv);
 
 			// Set up the output div
 			_logDiv = document.createElement("div");
 			_logDiv.style.display = "none";
-			div.onclick = function () {
+			titleDiv.onclick = function () {
 				if (this.style.display === "none") {
 					this.style.display = "block";
 				}
@@ -100,20 +106,20 @@
 					this.style.display = "none";
 				}
 			}.bind(_logDiv);
-			div.appendChild(_logDiv);
-			document.getElementById("output").appendChild(div);
+			containerDiv.appendChild(_logDiv);
+			document.getElementById("output").appendChild(containerDiv);
 
 			// Function to pass or fail the test
-			return function complete(passed) {
+			return function complete(passed, errorMessage) {
 				if (passed) {
-					div.classList.add("passed");
-					span.innerText = "[PASSED]";
-					span.parentElement.style.color = "green";
+					containerDiv.classList.add("passed");
+					passFailSpan.innerText = "[PASSED]";
+					passFailSpan.parentElement.style.color = "green";
 				}
 				else {
-					div.classList.add("failed");
-					span.innerText = "[FAILED]";
-					span.parentElement.style.color = "red";
+					containerDiv.classList.add("failed");
+					passFailSpan.innerText = "[FAILED] - " + errorMessage;
+					passFailSpan.parentElement.style.color = "red";
 				}
 			};
 		},
@@ -217,10 +223,11 @@
 		passed: 0,
 		failed: 0,
 	};
-	var _testComplete = null;	// Function to mark a current test output div as passed or failed
-	var _logDiv = null;			// The log output div for the currently executing test
-	var _scriptsToLoad = [];	// The list of scripts we need to make sure a loaded before running tests
-	var _failedToLoad = false;	// A flag to indicate that a script has failed to load
+	var _testComplete = null;		// Function to mark a current test output div as passed or failed
+	var _logDiv = null;				// The log output div for the currently executing test
+	var _scriptsToLoad = [];		// The list of scripts we need to make sure a loaded before running tests
+	var _failedToLoad = false;		// A flag to indicate that a script has failed to load
+	var _expectedException = null;	// Details logged by the current test about the exception is it expecting to generate
 
 	// Builds an assert failure message
 	var _buildMessage = function _buildMessage(fromAssert, fromTest) {
@@ -228,6 +235,11 @@
 			return fromAssert + ": " + fromTest;
 		}
 		return fromAssert;
+	};
+
+	// Returns the first line of an exception to use as a summary
+	var _getExceptionSummary = function _getExceptionSummary(ex) {
+		return ex.message.split("\n")[0];
 	};
 
 	// Function to update the current progress
@@ -239,13 +251,39 @@
 
 	// Executes a single test by shifting it from the test list and handling the passed/failed state
 	var _execTest = function _execTest() {
+		// First clear out any previously clear exception expectations, this is set up by tests on demand
+		_expectedException = null;
+		var handledException = false;
+
 		var test = _testList.shift();
 		try {
 			// Execute any code that needs to run before the test
 			test.class.beforeTest && test.class.beforeTest();
 			test.func.before && test.func.before();
 
-			test.func.apply(test.class);
+			// A first chance try so that we can evaluate any expected exceptions before failing the test
+			try {
+				test.func.apply(test.class);
+			}
+			catch (testEx) {
+				// Test if we are expecting any exceptions
+				if (!_expectedException) throw testEx;
+
+				if (_expectedException.type && !(testEx instanceof _expectedException.type)) {
+					throw new Error(_buildMessage("Wrong exception type thrown. Expected = " + _expectedException.type.name + ", Actual = " + testEx.constructor.name, _expectedException.errorMessage));
+				}
+
+				if (_expectedException.message && testEx.message.match(_expectedException.message) == null) {
+					throw new Error(_buildMessage("Wrong exception message thrown. Expected = '" + _expectedException.message + "', Actual = '" + testEx.message + "'", _expectedException.errorMessage));
+				}
+
+				handledException = true;
+			}
+
+			if (_expectedException && !handledException) {
+				// No exception was thrown, but we were expecting one
+				throw new Error(_buildMessage("No exception thrown", _expectedException.errorMessage));
+			}
 
 			_progress.passed++;
 			_testComplete(true);
@@ -253,7 +291,7 @@
 		catch (e) {
 			// Log the test failure
 			_progress.failed++;
-			_testComplete(false);
+			_testComplete(false, _getExceptionSummary(e));
 			Test.logException(e);
 		}
 
