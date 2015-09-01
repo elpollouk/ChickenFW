@@ -95,12 +95,12 @@
 	// Public API
 	//-----------------------------------------------------------------------------------------------------------------
 
-	var InJetson = {
+	var Inject = {
 
 		// Register an item in the store
 		// register(name, value)                - Register an immediate value that doesn't require initialisation or dependencies
 		// register(name, dependencies, initor) - Register a component that requires injection to construct
-		register: function InJetson_register() {
+		register: function Chicken_register() {
 
 			switch (arguments.length) {
 				case 2:
@@ -112,22 +112,22 @@
 					break;
 
 				default:
-					throw new Error("Incorrect number of arguments passed to InJetson.register()");
+					throw new Error("Incorrect number of arguments passed to Chicken.register()");
 			}
 
 		},
 
 		// Immediately inject the specified dependencies into the provided initor
 		// No return value is expected from the initor
-		use: function InJetson_use(dependencies, initor) {
+		inject: function Chicken_inject(dependencies, initor) {
 
-			_validateDependenciesVsInitor("InJetson.use()", dependencies, initor);
+			_validateDependenciesVsInitor("Chicken.inject()", dependencies, initor);
 			this._initItem(dependencies, initor, [], null);
 
 		},
 
 		// Resolve all dependencies now so that there is no lazy initialisation of existing dependencies
-		resolveAll: function InJetson_resolveAll() {
+		resolveAll: function Chicken_resolveAll() {
 
 			var requiredBy = [];
 
@@ -145,18 +145,12 @@
 
 		// Fetch a named item from the object store
 		// This will resolve any required dependencies
-		fetch: function InJetson_fetch(name) {
-			return this._fetch(name, [], null);
-		},
-
-		// Testing function that allows you specify mocks for dependencies
-		// This will cause all dependencies to re-initialise but won't save their resolved values in the object store
-		test: function InJetson_test(name, mocks) {
+		fetch: function Chicken_fetch(name, mocks) {
 			return this._fetch(name, [], mocks);
 		},
 
 		// Clear out all the registered items and revert back to a clean state
-		clear: function InJetson_clear() {
+		clear: function Chicken_clear() {
 			_objectStore = {};
 		},
 
@@ -166,7 +160,7 @@
 		//-----------------------------------------------------------------------------------------------------------------
 
 		// Check an object store item and resolve it if required returning its value
-		_checkAndResolve: function InJetson__checkAndResolve(item, requiredBy, mocks) {
+		_checkAndResolve: function Chicken__checkAndResolve(item, requiredBy, mocks) {
 
 			var value = item.value;
 
@@ -192,7 +186,7 @@
 		},
 
 		// Inject the specified dependencies into the provided initor, resolving where required
-		_initItem: function InJetson__initItem(dependencies, initor, requiredBy, mocks) {
+		_initItem: function Chicken__initItem(dependencies, initor, requiredBy, mocks) {
 
 			// We need to resolve this object
 			var length = dependencies.length;
@@ -211,7 +205,7 @@
 
 		// Fetches an object from the store
 		// requiredBy is used internally to aide with debugging
-		_fetch: function InJetson__fetch(name, requiredBy, mocks) {
+		_fetch: function Chicken__fetch(name, requiredBy, mocks) {
 
 		    // Check for circular dependencies
 		    if (requiredBy.indexOf(name) >= 0) throw new Error("Circular dependency detected when resolving '" + name + "'." + _formatRequiredBy(requiredBy));
@@ -244,6 +238,6 @@
 	//-----------------------------------------------------------------------------------------------------------------
 	// API Export
 	//-----------------------------------------------------------------------------------------------------------------
-	window.InJetson = InJetson;
+	Chicken.namespace("Chicken", Inject);
 
 })();
