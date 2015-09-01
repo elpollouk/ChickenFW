@@ -18,76 +18,79 @@
 		register_wrongArgs: function () {
 			Assert.expectedException({
 				message: "Incorrect number of arguments passed to Chicken.register()"
+			}, function () {
+				Chicken.register();
 			});
-			Chicken.register();
 		},
 
 		register_value_existing: function () {
+			Chicken.register("value", 1);
+
 			Assert.expectedException({
 				message: "Item 'value' already registered"
+			}, function () {
+				Chicken.register("value", 2);
 			});
-			Chicken.register("value", 1);
-			Chicken.register("value", 2);
+			Assert.isSame(1, Chicken.fetch("value"), "Registered value was changed");
 		},
 
 		register_value_nonStringName: function () {
 			Assert.expectedException({
 				message: "Invalid name specified. Must be a string but was number"
+			}, function () {
+				Chicken.register(123, 456);
 			});
-			Chicken.register(123, 456);
 		},
 
 		register_initor_existing: function () {
-			Assert.expectedException({
-				message: "Item 'value' already registered" 
-			});
 			Chicken.register("value", [], function () {
 				return "ok";
 			});
-			Chicken.register("value", [], function () {
-				return null;
+			Assert.expectedException({
+				message: "Item 'value' already registered" 
+			}, function () {
+				Chicken.register("value", [], function () {});
 			});
 		},
 
 		register_initor_nonStringName: function () {
 			Assert.expectedException({
 				message: "Invalid name specified. Must be a string but was object"
-			});
-			Chicken.register({}, [], function () {
-				Assert.fail("Initor called");
+			}, function () {
+				Chicken.register({}, [], function () {});
 			});
 		},
 
 		register_initor_nonArrayDepedencies: function () {
 			Assert.expectedException({
 				message: "Dependencies weren't passed as an array for 'Foo'"
-			});
-			Chicken.register("Foo", "bad", function () {
-				Assert.fail("Initor called");
+			}, function () {
+				Chicken.register("Foo", "bad", function () {});
 			});
 		},
 
 		register_initor_nonFunctionInitor: function () {
 			Assert.expectedException({
 				message: "Invalid initor for 'Foo'" 
+			}, function () {
+				Chicken.register("Foo", [], null);
 			});
-			Chicken.register("Foo", [], null);
 		},
 
 		register_initor_argumentMismatch: function () {
 			Assert.expectedException({
 				message: "Wrong number of dependencies specified for initor provided for 'Foo'"
-			});
-			Chicken.register("Foo", ["a", "b", "c"], function (a, b) {
-				Assert.fail("Initor called");
+			}, function () {
+				Chicken.register("Foo", ["a", "b", "c"], function (a, b) {});
 			});
 		},
 
 		fetch_noDependenciesRegistered: function () {
 			Assert.expectedException({
 				message: "Item 'bar' has not been registered."
+			}, function () {
+				Chicken.fetch("bar");
 			});
-			Chicken.fetch("bar");
 		},
 
 		fetch_mocks: function () {
@@ -246,20 +249,17 @@
 		},
 
 		fetch_initor_missingDependency: function () {
-			Assert.expectedException({
-				message: "Item 'bar' has not been registered"
-			});
 			Chicken.register("foo", ["bar"], function (bar) {
 				Assert.fail("Initor was called");
 			});
-			Chicken.fetch("foo");
+			Assert.expectedException({
+				message: "Item 'bar' has not been registered"
+			}, function () {
+				Chicken.fetch("foo");
+			});
 		},
 
 		fetch_initor_circularDependencies: function () {
-			Assert.expectedException({
-				message: "Circular dependency detected when resolving 'foo'." 
-			});
-
 			Chicken.register("foo", ["bar"], function (bar) {
 				Assert.fail("Initor foo was called");
 			});
@@ -273,7 +273,11 @@
 			Chicken.register("bob", 1);
 			Chicken.register("dave", 2);
 
-			Chicken.fetch("foo");
+			Assert.expectedException({
+				message: "Circular dependency detected when resolving 'foo'." 
+			}, function () {
+				Chicken.fetch("foo");
+			});
 		},
 
 		inject: function () {

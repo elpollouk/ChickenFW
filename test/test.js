@@ -74,8 +74,28 @@
 			throw new Error(_buildMessage("Failed", message));
 		},
 
-		expectedException: function expectedException(details) {
-			_expectedException = details || {};
+		expectedException: function expectedException(details, func, message) {
+			details = details || {};
+
+			try {
+				func();
+			}
+			catch (ex) {
+				if (details.type && !(ex instanceof details.type)) {
+					message = _buildMessage("Wrong exception type thrown. Expected = " + details.type.name + ", Actual = " + ex.constructor.name, message)
+					throw new Error(message);
+				}
+
+				if (details.message && ex.message.match(details.message) == null) {
+					message = _buildMessage("Wrong exception message thrown. Expected = '" + details.message + "', Actual = '" + ex.message + "'", message)
+					throw new Error(message);
+				}
+
+				// If we got here, then the exception was what we expected and we can return safely
+				return;
+			}
+
+			throw new Error(_buildMessage("No exception thrown", message));
 		},
 	};
 
@@ -227,7 +247,6 @@
 	var _logDiv = null;				// The log output div for the currently executing test
 	var _scriptsToLoad = [];		// The list of scripts we need to make sure a loaded before running tests
 	var _failedToLoad = false;		// A flag to indicate that a script has failed to load
-	var _expectedException = null;	// Details logged by the current test about the exception is it expecting to generate
 
 	// Builds an assert failure message
 	var _buildMessage = function _buildMessage(fromAssert, fromTest) {
@@ -251,39 +270,13 @@
 
 	// Executes a single test by shifting it from the test list and handling the passed/failed state
 	var _execTest = function _execTest() {
-		// First clear out any previously clear exception expectations, this is set up by tests on demand
-		_expectedException = null;
-		var handledException = false;
-
 		var test = _testList.shift();
 		try {
 			// Execute any code that needs to run before the test
 			test.class.beforeTest && test.class.beforeTest();
 			test.func.before && test.func.before();
 
-			// A first chance try so that we can evaluate any expected exceptions before failing the test
-			try {
-				test.func.apply(test.class);
-			}
-			catch (testEx) {
-				// Test if we are expecting any exceptions
-				if (!_expectedException) throw testEx;
-
-				if (_expectedException.type && !(testEx instanceof _expectedException.type)) {
-					throw new Error(_buildMessage("Wrong exception type thrown. Expected = " + _expectedException.type.name + ", Actual = " + testEx.constructor.name, _expectedException.errorMessage));
-				}
-
-				if (_expectedException.message && testEx.message.match(_expectedException.message) == null) {
-					throw new Error(_buildMessage("Wrong exception message thrown. Expected = '" + _expectedException.message + "', Actual = '" + testEx.message + "'", _expectedException.errorMessage));
-				}
-
-				handledException = true;
-			}
-
-			if (_expectedException && !handledException) {
-				// No exception was thrown, but we were expecting one
-				throw new Error(_buildMessage("No exception thrown", _expectedException.errorMessage));
-			}
+			test.func.apply(test.class);
 
 			_progress.passed++;
 			_testComplete(true);
