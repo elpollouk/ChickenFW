@@ -6,5 +6,6 @@
 	Test.addScripts("../js/namespace.js",				"namespace.tests.js");
 	Test.addScripts("../js/class.js",					"class.tests.js");
 	Test.addScripts("../js/inject.js",					"inject.tests.js");
+	Test.addScripts("../js/worker.js",					"worker.tests.js");
 
 })();
