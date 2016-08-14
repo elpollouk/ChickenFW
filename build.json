@@ -1,0 +1,20 @@
+{
+    "output": "../elpollouk.github.io/libs/ChickenFW.js",
+    "input": [
+        {
+            "path": "js/mix.js"
+        },
+        {
+            "path": "js/namespace.js"
+        },
+        {
+            "path": "js/class.js"
+        },
+        {
+            "path": "js/inject.js"
+        },
+        {
+            "path": "js/worker.js"
+        }
+    ]
+}
