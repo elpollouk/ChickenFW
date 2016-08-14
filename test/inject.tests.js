@@ -47,7 +47,7 @@
 				return "ok";
 			});
 			Assert.expectedException({
-				message: "Item 'value' already registered" 
+				message: "Item 'value' already registered"
 			}, function () {
 				Chicken.register("value", [], function () {});
 			});
@@ -71,7 +71,7 @@
 
 		register_initor_nonFunctionInitor: function () {
 			Assert.expectedException({
-				message: "Invalid initor for 'Foo'" 
+				message: "Invalid initor for 'Foo'"
 			}, function () {
 				Chicken.register("Foo", [], null);
 			});
@@ -274,13 +274,13 @@
 			Chicken.register("dave", 2);
 
 			Assert.expectedException({
-				message: "Circular dependency detected when resolving 'foo'." 
+				message: "Circular dependency detected when resolving 'foo'."
 			}, function () {
 				Chicken.fetch("foo");
 			});
 		},
 
-		inject: function () {
+		inject_noReturnValue: function () {
 			var output;
 			var count = 0;
 
@@ -290,13 +290,25 @@
 				return "World";
 			});
 
-			Chicken.inject(["foo", "bar", "Assert.isEqual"], function (foo, bar, isEqual) {
+			var r = Chicken.inject(["foo", "bar", "Assert.isEqual"], function (foo, bar, isEqual) {
 				Assert.isSame(Assert.isEqual, isEqual, "Wrong global value passed through");
 				output = foo + " " + bar + "!!";
 			});
 
 			Assert.isSame(1, count, "Initor called multiple times");
 			Assert.isSame("Hello World!!", output, "Output wasn't set correctly");
+			Assert.isUndefined(r, "Unexpected return value from inject()");
+		},
+
+		inject_returnValue: function () {
+			Chicken.register("foo", 3);
+			Chicken.register("bar", 7);
+
+			var r = Chicken.inject(["foo", "bar"], function (foo, bar) {
+				return foo + bar;
+			});
+
+			Assert.isEqual(r, 10, "Unexpected return value from inject()");
 		},
 
 		resolveAll: function () {

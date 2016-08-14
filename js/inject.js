@@ -118,11 +118,11 @@
 		},
 
 		// Immediately inject the specified dependencies into the provided initor
-		// No return value is expected from the initor
+		// No return value is needed from the initor
 		inject: function Chicken_inject(dependencies, initor) {
 
 			_validateDependenciesVsInitor("Chicken.inject()", dependencies, initor);
-			this._initItem(dependencies, initor, [], null);
+			return this._initItem(dependencies, initor, [], null);
 
 		},
 
