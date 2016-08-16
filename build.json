@@ -2,6 +2,10 @@
     "title": "ChickenFW",
     "version": "1.0.0",
     "output": "../elpollouk.github.io/libs/ChickenFW.js",
+    "minify": {
+        "type": "uglifyjs",
+        "options": ["-c", "-m"]
+    },
     "input": [
         {
             "path": "js/mix.js"

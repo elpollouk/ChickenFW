@@ -20,15 +20,37 @@ project.version && builder.push(`// Version: ${project.version}\n`);
 builder.push(`// Built: ${new Date().toISOString()}\n`);
 builder.push(`// Commit: ${commitId}\n\n`);
 
-// Loop through the input files adding them to the output
-for (var i = 0; i < project.input.length; i++) {
-    var path = project.input[i].path;
-    console.log(`Adding ${path}...`);
-    builder.push(`// File: ${path}\n`);
+if (project.minify) {
+    var compressor = require('node-minify');
+    var infiles = [];
+    for (var i = 0; i < project.input.length; i++) {
+        var path = project.input[i].path;
+        console.log(`Adding ${path}...`);
+        infiles.push(path);
+    }
 
-    var data = fs.readFileSync(path, "utf8");
-    builder.push(data);
-    builder.push("\n\n");
+    new compressor.minify({
+        type: project.minify.type,
+        options: project.minify.options,
+        fileIn: infiles,
+        sync: true,
+        fileOut: 'build.tmp',
+        callback: function(err, min) {
+            builder.push(min);
+        }
+    });
+}
+else {
+    // Loop through the input files adding them to the output
+    for (var i = 0; i < project.input.length; i++) {
+        var path = project.input[i].path;
+        console.log(`Adding ${path}...`);
+        builder.push(`// File: ${path}\n`);
+
+        var data = fs.readFileSync(path, "utf8");
+        builder.push(data);
+        builder.push("\n\n");
+    }
 }
 
 // Write the output to the final location
