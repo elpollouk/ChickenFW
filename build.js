@@ -4,7 +4,8 @@ var fs = require('fs');
 var execSync = require('child_process').execSync;
 
 // Load project file
-var project = require("./build.json");
+var data = fs.readFileSync("./build.json", "utf8");
+var project = JSON.parse(data);
 console.log(`Building ${project.output}...`);
 
 // Get the current revision id
