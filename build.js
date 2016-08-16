@@ -7,6 +7,7 @@ var execSync = require('child_process').execSync;
 var data = fs.readFileSync("./build.json", "utf8");
 var project = JSON.parse(data);
 console.log(`Building ${project.output}...`);
+project.version && console.log(`Version: ${project.version}`);
 
 // Get the current revision id
 var commitId = execSync("git rev-parse HEAD").toString().trim();
@@ -14,6 +15,8 @@ console.log(`Commit id: ${commitId}`);
 
 // Create the header
 var builder = [];
+project.title && builder.push(`// ${project.title}\n`);
+project.version && builder.push(`// Version: ${project.version}\n`);
 builder.push(`// Built: ${new Date().toISOString()}\n`);
 builder.push(`// Commit: ${commitId}\n\n`);
 
