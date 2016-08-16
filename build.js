@@ -21,8 +21,10 @@ builder.push(`// Built: ${new Date().toISOString()}\n`);
 builder.push(`// Commit: ${commitId}\n\n`);
 
 if (project.minify) {
+    fs.writeFileSync("prebuild.tmp", '"use strict";\n', "utf8");
+
     var compressor = require('node-minify');
-    var infiles = [];
+    var infiles = ["prebuild.tmp"];
     for (var i = 0; i < project.input.length; i++) {
         var path = project.input[i].path;
         console.log(`Adding ${path}...`);
