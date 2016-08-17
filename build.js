@@ -1,5 +1,10 @@
 "use strict";
 
+var CLEANUP_FILES = [
+    "prebuild.tmp",
+    "build.tmp"
+];
+
 var fs = require('fs');
 var execSync = require('child_process').execSync;
 
@@ -57,5 +62,11 @@ else {
 
 // Write the output to the final location
 fs.writeFileSync(project.output, builder.join(""), "utf8");
+
+// Clean up temp files
+console.log("Cleaning up...");
+for (var i = 0; i < CLEANUP_FILES.length; i++) {
+    fs.unlinkSync(CLEANUP_FILES[i]);
+}
 
 console.log("Done.");
